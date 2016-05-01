@@ -8,6 +8,7 @@ if (!process.env.SLACK_API_TOKEN) {
 const os = require('os');
 const evejsapi = require('evejsapi');
 
+const Help = require('./lib/help');
 const EveCentral = require('./lib/central');
 const eveCentral = new EveCentral();
 
@@ -17,26 +18,21 @@ const XmlClient = new evejsapi.client.xml({
 
 const Botkit = require('botkit');
 const controller = Botkit.slackbot({
-  debug: false
+  logLevel: process.env.LOG_LEVEL || info,
+  // storage: require('./node_modules/botkit/lib/storage/redis_storage')
 });
+
+// const sqlite3 = require('sqlite3').verbose();
+// const db = new sqlite3.Database('./database/sqlite-latest.sqlite');
+// db.serialize(() => {
+//   controller.spawn({
+//     token: process.env.SLACK_API_TOKEN || ''
+//   }).startRTM();
+// });
 
 controller.spawn({
   token: process.env.SLACK_API_TOKEN || ''
 }).startRTM();
-
-controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function (bot, message) {
-
-  bot.api.reactions.add({
-    timestamp: message.ts,
-    channel: message.channel,
-    name: 'robot_face',
-  }, function (err) {
-    if (err) {
-      bot.botkit.log('Failed to add emoji reaction :(', err);
-    }
-  });
-
-});
 
 controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', function (bot, message) {
 
@@ -71,38 +67,33 @@ controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', func
   ;
 });
 
-controller.hears(['^central$', '(^help)'], 'direct_message,direct_mention,mention', function (bot, message) {
+controller.hears(['^help$', '^hi$', '^hello$'], 'direct_message,direct_mention,mention', function (bot, message) {
+  bot.reply(message, {
+    attachments: [{
+      pretext: 'Hello, im your sister of EVE™ bot for slack. These are your available commands at the moment in this channel.',
+      title: '• [hello], [hi] -- greets you\n' +
+      EveCentral.globalHelp() + '\n' +
+      '• [serverStatus] -- command returns the server status',
+      mrkdwn_in: [
+        "text",
+        "pretext"
+      ]
+    }]
+  });
+});
 
+controller.hears(['^central$'], 'direct_message,direct_mention,mention', function (bot, message) {
   bot.reply(message, {
     attachments: EveCentral.allHelp()
   });
 });
 
-controller.hears(['^central hub'], 'direct_message,direct_mention,mention', function(bot, message) {
+controller.hears(['^central hub'], 'direct_message,direct_mention,mention', (bot, message) => {
+  eveCentral.hub(bot, message);
+});
 
-  eveCentral.getSavedHub(message.user)
-    .then((savedHub) => {
-      const hubInfo = message.text.split(/ /);
-      if (hubInfo.length === 2) {
-        return savedHub;
-      } else {
-        return eveCentral.saveHub(message.user, hubInfo[hubInfo.length - 1]);
-      }
-    })
-    .then((savedHub) => {
-      bot.reply(message, {
-        attachments: [{
-          title: 'saved Hub: ' + savedHub
-        }, EveCentral.hubHelp()]
-      });
-    })
-    .catch((err) => {
-      bot.reply(message, {
-        attachments: [{
-          title: 'save failed' + err
-        }, EveCentral.hubHelp()]
-      });
-    });
+controller.hears(['^central price'], 'direct_message,direct_mention,mention', (bot, message) => {
+  eveCentral.pricetype(bot, message);
 });
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
@@ -133,5 +124,5 @@ function formatUptime(uptime) {
     unit = unit + 's';
   }
 
-  return uptime + ' ' + unit;
+  return uptime.toFixed(2) + ' ' + unit;
 }

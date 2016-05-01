@@ -19,6 +19,10 @@
   "dependencies": {
     "botkit": "^0.1.1",
     "evejsapi": "^0.0.2",
-    "lodash": "^4.11.1"
+    "hiredis": "^0.4.1",
+    "lodash": "^4.11.1",
+    "mongoose": "^4.4.14",
+    "redis": "^2.6.0-2",
+    "sqlite3": "^3.1.3"
   }
 }
