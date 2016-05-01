@@ -1,5 +1,5 @@
 start auf der console
 
 ```javascript
-SLACK_API_TOKEN=<TOKEN> node index.js
+NODE_ENV=development SLACK_API_TOKEN=<TOKEN> LOG_LEVEL=info node index.js
 ```
