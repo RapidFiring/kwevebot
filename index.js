@@ -8,7 +8,8 @@ if (!process.env.SLACK_API_TOKEN) {
 const os = require('os');
 const evejsapi = require('evejsapi');
 
-const cache = new evejsapi.cache.redis();
+const EveCentral = require('./lib/central');
+const eveCentral = new EveCentral();
 
 const XmlClient = new evejsapi.client.xml({
   cache: new evejsapi.cache.redis(),
@@ -16,7 +17,7 @@ const XmlClient = new evejsapi.client.xml({
 
 const Botkit = require('botkit');
 const controller = Botkit.slackbot({
-  debug: false,
+  debug: false
 });
 
 controller.spawn({
@@ -73,24 +74,35 @@ controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', func
 controller.hears(['^central$', '(^help)'], 'direct_message,direct_mention,mention', function (bot, message) {
 
   bot.reply(message, {
-    attachments: require('./lib/central').help
+    attachments: EveCentral.allHelp()
   });
 });
 
 controller.hears(['^central hub'], 'direct_message,direct_mention,mention', function(bot, message) {
 
-  const cacheKey = cache.getHashedKey(message.user + 'central hub');
-  const hubInfo = message.text.split(/ /);
-
-  cache.read(cacheKey)
-    .then((data) => {
-      if (data !== null) {}
-      console.info('read', data, hubInfo);
+  eveCentral.getSavedHub(message.user)
+    .then((savedHub) => {
+      const hubInfo = message.text.split(/ /);
+      if (hubInfo.length === 2) {
+        return savedHub;
+      } else {
+        return eveCentral.saveHub(message.user, hubInfo[hubInfo.length - 1]);
+      }
     })
-    .catch(console.error);
-
-  console.info(message, cache.getHashedKey(message.user + 'central hub'));
-
+    .then((savedHub) => {
+      bot.reply(message, {
+        attachments: [{
+          title: 'saved Hub: ' + savedHub
+        }, EveCentral.hubHelp()]
+      });
+    })
+    .catch((err) => {
+      bot.reply(message, {
+        attachments: [{
+          title: 'save failed' + err
+        }, EveCentral.hubHelp()]
+      });
+    });
 });
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],

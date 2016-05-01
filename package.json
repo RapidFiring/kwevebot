@@ -18,6 +18,7 @@
   "homepage": "https://github.com/RapidFiring/kwevebot#readme",
   "dependencies": {
     "botkit": "^0.1.1",
-    "evejsapi": "0.0.2"
+    "evejsapi": "^0.0.2",
+    "lodash": "^4.11.1"
   }
 }
