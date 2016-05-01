@@ -5,6 +5,19 @@ if (!process.env.SLACK_API_TOKEN) {
   process.exit(1);
 }
 
+String.prototype.capitalize = function(){
+  return this.toLowerCase().replace( /\b\w/g, function (m) {
+    return m.toUpperCase();
+  });
+};
+
+Number.prototype.formatISK = function(n, x, s, c) {
+  var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
+    num = this.toFixed(Math.max(0, ~~n));
+
+  return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
+};
+
 const os = require('os');
 const evejsapi = require('evejsapi');
 
@@ -22,17 +35,13 @@ const controller = Botkit.slackbot({
   // storage: require('./node_modules/botkit/lib/storage/redis_storage')
 });
 
-// const sqlite3 = require('sqlite3').verbose();
-// const db = new sqlite3.Database('./database/sqlite-latest.sqlite');
-// db.serialize(() => {
-//   controller.spawn({
-//     token: process.env.SLACK_API_TOKEN || ''
-//   }).startRTM();
-// });
-
-controller.spawn({
-  token: process.env.SLACK_API_TOKEN || ''
-}).startRTM();
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./database/sqlite-latest.sqlite');
+db.serialize(() => {
+  controller.spawn({
+    token: process.env.SLACK_API_TOKEN || ''
+  }).startRTM();
+});
 
 controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', function (bot, message) {
 
@@ -68,6 +77,9 @@ controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', func
 });
 
 controller.hears(['^help$', '^hi$', '^hello$'], 'direct_message,direct_mention,mention', function (bot, message) {
+  bot.identifyBot((err, botInfo) => {
+    console.log(botInfo, message);
+  });
   bot.reply(message, {
     attachments: [{
       pretext: 'Hello, im your sister of EVE™ bot for slack. These are your available commands at the moment in this channel.',
@@ -95,6 +107,22 @@ controller.hears(['^central hub'], 'direct_message,direct_mention,mention', (bot
 controller.hears(['^central price'], 'direct_message,direct_mention,mention', (bot, message) => {
   eveCentral.pricetype(bot, message);
 });
+
+controller.hears(['^central'], 'direct_message', (bot, message) => {
+  const search = message.text.match(/("?([a-zA-Z0-9'\-\s]\w+)*")|(\w+)/g);
+
+  if (search.length > 4 || message.text.indexOf('"') === -1) {
+    bot.reply(message, {
+      attachments: [{
+        color: 'danger',
+        title: 'Parameter Match failed'
+      }]
+    });
+  } else {
+    eveCentral.fetch(bot, message, search, db);
+  }
+});
+
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
   'direct_message,direct_mention,mention', function (bot, message) {
