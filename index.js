@@ -6,7 +6,7 @@ if (!process.env.SLACK_API_TOKEN) {
 }
 
 String.prototype.capitalize = function(){
-  return this.toLowerCase().replace( /\b\w/g, function (m) {
+  return this.toLowerCase().replace( /\b\w/g, (m) => {
     return m.toUpperCase();
   });
 };
@@ -21,7 +21,6 @@ Number.prototype.formatISK = function(n, x, s, c) {
 const os = require('os');
 const evejsapi = require('evejsapi');
 
-const Help = require('./lib/help');
 const EveCentral = require('./lib/central');
 const eveCentral = new EveCentral();
 
@@ -32,7 +31,7 @@ const XmlClient = new evejsapi.client.xml({
 const Botkit = require('botkit');
 const controller = Botkit.slackbot({
   logLevel: process.env.LOG_LEVEL || info,
-  // storage: require('./node_modules/botkit/lib/storage/redis_storage')
+  storage: require('botkit-storage-redis')()
 });
 
 const sqlite3 = require('sqlite3').verbose();
@@ -43,7 +42,7 @@ db.serialize(() => {
   }).startRTM();
 });
 
-controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', function (bot, message) {
+controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', (bot, message) => {
 
   XmlClient.fetch('server:ServerStatus')
     .then((data) => {
@@ -76,10 +75,7 @@ controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', func
   ;
 });
 
-controller.hears(['^help$', '^hi$', '^hello$'], 'direct_message,direct_mention,mention', function (bot, message) {
-  bot.identifyBot((err, botInfo) => {
-    console.log(botInfo, message);
-  });
+controller.hears(['^help$', '^hi$', '^hello$'], 'direct_message,direct_mention,mention', (bot, message) => {
   bot.reply(message, {
     attachments: [{
       pretext: 'Hello, im your sister of EVE™ bot for slack. These are your available commands at the moment in this channel.',
@@ -94,7 +90,7 @@ controller.hears(['^help$', '^hi$', '^hello$'], 'direct_message,direct_mention,m
   });
 });
 
-controller.hears(['^central$'], 'direct_message,direct_mention,mention', function (bot, message) {
+controller.hears(['^central$'], 'direct_message,direct_mention,mention', (bot, message) => {
   bot.reply(message, {
     attachments: EveCentral.allHelp()
   });
@@ -109,7 +105,9 @@ controller.hears(['^central price'], 'direct_message,direct_mention,mention', (b
 });
 
 controller.hears(['^central'], 'direct_message', (bot, message) => {
-  const search = message.text.match(/("?([a-zA-Z0-9'\-\s]\w+)*")|(\w+)/g);
+  const search = message.text.match(/([\""].+?[\""]|[^ ]+)/g);
+
+  console.log(search);
 
   if (search.length > 4 || message.text.indexOf('"') === -1) {
     bot.reply(message, {
@@ -125,7 +123,7 @@ controller.hears(['^central'], 'direct_message', (bot, message) => {
 
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
-  'direct_message,direct_mention,mention', function (bot, message) {
+  'direct_message,direct_mention,mention', (bot, message) => {
 
     const hostname = os.hostname();
     const uptime = formatUptime(process.uptime());
