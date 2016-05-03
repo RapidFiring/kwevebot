@@ -42,28 +42,23 @@ db.serialize(() => {
   }).startRTM();
 });
 
-controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', (bot, message) => {
-
+controller.hears(['^!serverstatus$', '^!server$', '^!ServerStatus$'], 'ambient,direct_message', (bot, message) => {
   XmlClient.fetch('server:ServerStatus')
     .then((data) => {
-
-      const status = data.serverOpen === 'True' ? 'Open' : 'Closed';
-
       bot.reply(message, {
-        "attachments": [{
-          "title": "Server",
-          "pretext": "EvE Online Server Status",
-          "text": "\t" + status,
-          "mrkdwn_in": [
-            "text",
-            "pretext"
-          ]
-        }, {
-          "title": "Online Player",
-          "text": "\t" + data.onlinePlayers,
-          "mrkdwn_in": [
-            "text"
-          ]
+        'attachments': [{
+          'fallback': 'ServerStatus - Status couldn\'t be verified:',
+          'title': 'EvE Online Server Status',
+          'fields': [{
+            'title': 'Tranquility',
+            'value': '\t' + (data.serverOpen === 'True' ? 'Online' : 'Offline'),
+            'short': true
+          }, {
+            'title': 'Online Player',
+            'value': '\t' + data.onlinePlayers,
+            'short': true
+          }],
+          'color': data.serverOpen === 'True' ? 'good' : 'danger'
         }]
       });
     })
@@ -75,39 +70,44 @@ controller.hears(['serverStatus'], 'direct_message,direct_mention,mention', (bot
   ;
 });
 
-controller.hears(['^help$', '^hi$', '^hello$'], 'direct_message,direct_mention,mention', (bot, message) => {
-  bot.reply(message, {
-    attachments: [{
-      pretext: 'Hello, im your sister of EVE™ bot for slack. These are your available commands at the moment in this channel.',
-      title: '• [hello], [hi] -- greets you\n' +
-      EveCentral.globalHelp() + '\n' +
-      '• [serverStatus] -- command returns the server status',
-      mrkdwn_in: [
-        "text",
-        "pretext"
-      ]
-    }]
+controller.hears(['^!hi$', '^!hello$'], 'ambient,direct_message', (bot, message) => {
+
+  bot.startPrivateConversation(message, (err, dm) => {
+    dm.say({
+      text: 'Hello, im your sister of EVE™ bot for slack. These are your available commands at the moment in this channel.',
+      attachments: [{
+        color: 'good',
+        title: '• [hello], [hi] -- greets you\n' +
+        EveCentral.globalHelp() + '\n' +
+        '• [serverStatus] -- command returns the server status',
+        mrkdwn_in: [
+          'title'
+        ]
+      }]
+    });
   });
 });
 
-controller.hears(['^central$'], 'direct_message,direct_mention,mention', (bot, message) => {
-  bot.reply(message, {
-    attachments: EveCentral.allHelp()
+controller.hears(['^!central$'], 'ambient,direct_message', (bot, message) => {
+
+  bot.startPrivateConversation(message, (err, dm) => {
+    dm.say({
+      text: '',
+      attachments: EveCentral.allHelp()
+    });
   });
 });
 
-controller.hears(['^central hub'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['^!central hub'], 'ambient,direct_message', (bot, message) => {
   eveCentral.hub(bot, message);
 });
 
-controller.hears(['^central price'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['^!central price'], 'ambient,direct_message', (bot, message) => {
   eveCentral.pricetype(bot, message);
 });
 
-controller.hears(['^central'], 'direct_message', (bot, message) => {
+controller.hears(['^!central'], 'ambient,direct_message', (bot, message) => {
   const search = message.text.match(/([\""].+?[\""]|[^ ]+)/g);
-
-  console.log(search);
 
   if (search.length > 4 || message.text.indexOf('"') === -1) {
     bot.reply(message, {

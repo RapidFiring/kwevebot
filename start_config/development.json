@@ -1,0 +1,19 @@
+{
+  "apps": [{
+    "name": "kwevebot",
+    "script": "./index.js",
+    "watch": true,
+    "ignore_watch" : ["node_modules", "logdir", ".gitignore", ".git", ".idea"],
+    "merge_logs": true,
+    "out_file": "./logdir/output.log",
+    "error_file": "./logdir/error.log",
+    "log_date_format": "YYYY-MM-DD HH:mm Z",
+    "max_memory_restart": "250M",
+    "env": {
+      "NODE_ENV": "development",
+      "LOG_LEVEL": "info",
+      "DEBUG": "*",
+      "DEBUG_COLORS": 1
+    }
+  }]
+}
