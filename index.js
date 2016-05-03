@@ -18,7 +18,6 @@ Number.prototype.formatISK = function(n, x, s, c) {
   return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
 };
 
-const os = require('os');
 const evejsapi = require('evejsapi');
 
 const EveCentral = require('./lib/central');
@@ -125,12 +124,11 @@ controller.hears(['^!central'], 'direct_message', (bot, message) => {
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
   'direct_message,direct_mention,mention,ambient', (bot, message) => {
 
-    const hostname = os.hostname();
     const uptime = formatUptime(process.uptime());
 
     bot.reply(message,
       ':robot_face: I am a bot named <@' + bot.identity.name +
-      '>. I have been running for ' + uptime + ' on ' + hostname + '.');
+      '>. I have been running for ' + uptime + '.');
   });
 
 function formatUptime(uptime) {
