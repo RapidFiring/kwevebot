@@ -71,7 +71,6 @@ controller.hears(['^!serverstatus$', '^!server$', '^!ServerStatus$'], 'ambient,d
 });
 
 controller.hears(['^!hi$', '^!hello$'], 'ambient,direct_message', (bot, message) => {
-
   bot.startPrivateConversation(message, (err, dm) => {
     dm.say({
       text: 'Hello, im your sister of EVE™ bot for slack. These are your available commands at the moment in this channel.',
@@ -88,8 +87,7 @@ controller.hears(['^!hi$', '^!hello$'], 'ambient,direct_message', (bot, message)
   });
 });
 
-controller.hears(['^!central$'], 'ambient,direct_message', (bot, message) => {
-
+controller.hears(['^!central$'], 'direct_message', (bot, message) => {
   bot.startPrivateConversation(message, (err, dm) => {
     dm.say({
       text: '',
@@ -98,32 +96,34 @@ controller.hears(['^!central$'], 'ambient,direct_message', (bot, message) => {
   });
 });
 
-controller.hears(['^!central hub'], 'ambient,direct_message', (bot, message) => {
+controller.hears(['^!central hub'], 'direct_message', (bot, message) => {
   eveCentral.hub(bot, message);
 });
 
-controller.hears(['^!central price'], 'ambient,direct_message', (bot, message) => {
+controller.hears(['^!central price'], 'direct_message', (bot, message) => {
   eveCentral.pricetype(bot, message);
 });
 
-controller.hears(['^!central'], 'ambient,direct_message', (bot, message) => {
+controller.hears(['^!central'], 'direct_message', (bot, message) => {
   const search = message.text.match(/([\""].+?[\""]|[^ ]+)/g);
 
   if (search.length > 4 || message.text.indexOf('"') === -1) {
-    bot.reply(message, {
-      attachments: [{
-        color: 'danger',
-        title: 'Parameter Match failed'
-      }]
+    bot.startPrivateConversation(message, (err, dm) => {
+      dm.say({
+        text: '',
+        attachments: [{
+          color: 'danger',
+          title: 'Parameter Match failed'
+        }]
+      });
     });
   } else {
     eveCentral.fetch(bot, message, search, db);
   }
 });
 
-
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
-  'direct_message,direct_mention,mention', (bot, message) => {
+  'direct_message,direct_mention,mention,ambient', (bot, message) => {
 
     const hostname = os.hostname();
     const uptime = formatUptime(process.uptime());
@@ -131,7 +131,6 @@ controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your na
     bot.reply(message,
       ':robot_face: I am a bot named <@' + bot.identity.name +
       '>. I have been running for ' + uptime + ' on ' + hostname + '.');
-
   });
 
 function formatUptime(uptime) {
