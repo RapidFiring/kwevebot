@@ -1,0 +1,28 @@
+{
+  "name": "kwevebot",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RapidFiring/kwevebot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RapidFiring/kwevebot/issues"
+  },
+  "homepage": "https://github.com/RapidFiring/kwevebot#readme",
+  "dependencies": {
+    "botkit": "^0.1.1",
+    "botkit-storage-redis": "^1.0.1",
+    "evejsapi": "^1.0.4",
+    "lodash": "^4.12.0",
+    "mongoose": "^4.4.17",
+    "redis": "^2.6.0-2",
+    "sqlite3": "^3.1.3"
+  }
+}
