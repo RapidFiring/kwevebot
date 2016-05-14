@@ -1,0 +1,15 @@
+{
+  "apps": [{
+    "name": "kwevebot",
+    "script": "./index.js",
+    "merge_logs": true,
+    "out_file": "./logdir/output.log",
+    "error_file": "./logdir/error.log",
+    "log_date_format": "YYYY-MM-DD HH:mm Z",
+    "max_memory_restart": "250M",
+    "env": {
+      "NODE_ENV": "production",
+      "LOG_LEVEL": "info"
+    }
+  }]
+}

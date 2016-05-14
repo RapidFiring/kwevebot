@@ -69,13 +69,13 @@ controller.hears(['^!serverstatus$', '^!server$', '^!ServerStatus$'], 'ambient,d
   ;
 });
 
-controller.hears(['^!hi$', '^!hello$'], 'ambient,direct_message', (bot, message) => {
+controller.hears(['^hi', '^hello', '^help'], 'ambient,direct_message', (bot, message) => {
   bot.startPrivateConversation(message, (err, dm) => {
     dm.say({
       text: 'Hello, im your sister of EVE™ bot for slack. These are your available commands at the moment in this channel.',
       attachments: [{
         color: 'good',
-        title: '• [hello], [hi] -- greets you\n' +
+        title: '• [hello], [hi], [help] -- greets you\n' +
         EveCentral.globalHelp() + '\n' +
         '• [serverStatus] -- command returns the server status',
         mrkdwn_in: [
