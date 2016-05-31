@@ -43,7 +43,7 @@ db.serialize(() => {
 
 controller.on('hello', (bot) => {
   console.info('Bot started and ping every 30sec');
-  setTimeout(() => {
+  setInterval(() => {
     bot.rtm.ping();
   }, 30000);
 
