@@ -41,7 +41,17 @@ db.serialize(() => {
   }).startRTM();
 });
 
+controller.on('hello', (bot) => {
+  console.info('Bot started and ping every 30sec');
+  setTimeout(() => {
+    bot.rtm.ping();
+  }, 30000);
+
+});
+
 controller.hears(['^!serverstatus$', '^!server$', '^!ServerStatus$'], 'ambient,direct_message', (bot, message) => {
+  bot.startTyping(message);
+
   XmlClient.fetch('server:ServerStatus')
     .then((data) => {
       bot.reply(message, {
@@ -69,29 +79,29 @@ controller.hears(['^!serverstatus$', '^!server$', '^!ServerStatus$'], 'ambient,d
   ;
 });
 
-controller.hears(['^hi', '^hello', '^help'], 'ambient,direct_message', (bot, message) => {
-  bot.startPrivateConversation(message, (err, dm) => {
-    dm.say({
-      text: 'Hello, im your sister of EVE™ bot for slack. These are your available commands at the moment in this channel.',
-      attachments: [{
-        color: 'good',
-        title: '• [hello], [hi], [help] -- greets you\n' +
-        EveCentral.globalHelp() + '\n' +
-        '• [serverStatus] -- command returns the server status',
-        mrkdwn_in: [
-          'title'
-        ]
-      }]
-    });
+controller.hears(['^hi', '^hello', '^help'], 'direct_message', (bot, message) => {
+  bot.startTyping(message);
+
+  bot.reply(message, {
+    text: 'Hello, im your sister of EVE™ bot for slack. These are your available commands at the moment in this channel.',
+    attachments: [{
+      color: 'good',
+      title: '• [hello], [hi], [help] -- greets you\n' +
+      EveCentral.globalHelp() + '\n' +
+      '• [serverStatus] -- command returns the server status',
+      mrkdwn_in: [
+        'title'
+      ]
+    }]
   });
 });
 
 controller.hears(['^!central$'], 'direct_message', (bot, message) => {
-  bot.startPrivateConversation(message, (err, dm) => {
-    dm.say({
-      text: '',
-      attachments: EveCentral.allHelp()
-    });
+  bot.startTyping(message);
+
+  bot.reply(message, {
+    text: '',
+    attachments: EveCentral.allHelp()
   });
 });
 
@@ -104,17 +114,17 @@ controller.hears(['^!central price'], 'direct_message', (bot, message) => {
 });
 
 controller.hears(['^!central'], 'direct_message', (bot, message) => {
+  bot.startTyping(message);
+
   const search = message.text.match(/([\""].+?[\""]|[^ ]+)/g);
 
   if (search.length > 4 || message.text.indexOf('"') === -1) {
-    bot.startPrivateConversation(message, (err, dm) => {
-      dm.say({
-        text: '',
-        attachments: [{
-          color: 'danger',
-          title: 'Parameter Match failed'
-        }]
-      });
+    bot.reply(message, {
+      text: '',
+      attachments: [{
+        color: 'danger',
+        title: 'Parameter Match failed'
+      }]
     });
   } else {
     eveCentral.fetch(bot, message, search, db);
