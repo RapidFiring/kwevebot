@@ -5,7 +5,6 @@ if (!process.env.SLACK_API_TOKEN) {
   process.exit(1);
 }
 
-
 const evejsapi = require('evejsapi');
 
 const Helper = require('./lib/helper');
@@ -24,6 +23,9 @@ const controller = Botkit.slackbot({
 
 const IndustryClass = require('./lib/industry');
 const industry = new IndustryClass(XmlClient);
+
+const keyId = process.env.CORP_KEY_ID || null;
+const vCode = process.env.CORP_VCODE || null;
 
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./database/sqlite-latest.sqlite');
@@ -136,8 +138,24 @@ controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your na
 controller.hears(['^!industry-history$'], 'direct_message', (bot, message) => {
   bot.startTyping(message);
 
-  const keyId = process.env.CORP_KEY_ID || null;
-  const vCode = process.env.CORP_VCODE || null;
+  if (keyId === null || vCode === null) {
+    bot.reply(message, {
+      text: '',
+      attachments: [{
+        color: 'danger',
+        title: 'keyId or vCode not set by start'
+      }]
+    });
+  } else {
+    industry.history(keyId, vCode)
+      .then((reply) => {
+        bot.reply(message, reply);
+      });
+  }
+});
+
+controller.hears(['^!industry$'], 'direct_message', (bot, message) => {
+  bot.startTyping(message);
 
   if (keyId === null || vCode === null) {
     bot.reply(message, {
@@ -148,9 +166,18 @@ controller.hears(['^!industry-history$'], 'direct_message', (bot, message) => {
       }]
     });
   } else {
-    industry.history(keyId, vCode, XmlClient)
+    industry.now(keyId, vCode)
       .then((reply) => {
         bot.reply(message, reply);
+      })
+      .catch(err => {
+        bot.reply(message, {
+          text: '',
+          attachments: [{
+            color: 'danger',
+            text: err
+          }]
+        });
       });
   }
 });
