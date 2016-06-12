@@ -5,21 +5,10 @@ if (!process.env.SLACK_API_TOKEN) {
   process.exit(1);
 }
 
-String.prototype.capitalize = function(){
-  return this.toLowerCase().replace( /\b\w/g, (m) => {
-    return m.toUpperCase();
-  });
-};
-
-Number.prototype.formatISK = function(n, x, s, c) {
-  var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
-    num = this.toFixed(Math.max(0, ~~n));
-
-  return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
-};
 
 const evejsapi = require('evejsapi');
 
+const Helper = require('./lib/helper');
 const EveCentral = require('./lib/central');
 const eveCentral = new EveCentral();
 
@@ -33,6 +22,9 @@ const controller = Botkit.slackbot({
   storage: require('botkit-storage-redis')()
 });
 
+const IndustryClass = require('./lib/industry');
+const industry = new IndustryClass(XmlClient);
+
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./database/sqlite-latest.sqlite');
 db.serialize(() => {
@@ -42,10 +34,10 @@ db.serialize(() => {
 });
 
 controller.on('hello', (bot) => {
-  console.info('Bot started and ping every 30sec');
+  console.info('Bot started and ping every 120sec');
   setInterval(() => {
     bot.rtm.ping();
-  }, 30000);
+  }, 120000);
 
 });
 
@@ -134,28 +126,31 @@ controller.hears(['^!central'], 'direct_message', (bot, message) => {
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
   'direct_message,direct_mention,mention,ambient', (bot, message) => {
 
-    const uptime = formatUptime(process.uptime());
+    const uptime = Helper.formatUptime(process.uptime());
 
     bot.reply(message,
       ':robot_face: I am a bot named <@' + bot.identity.name +
       '>. I have been running for ' + uptime + '.');
   });
 
-function formatUptime(uptime) {
-  let unit = 'second';
-  if (uptime > 60) {
-    uptime = uptime / 60;
-    unit = 'minute';
-  }
+controller.hears(['^!industry-history$'], 'direct_message', (bot, message) => {
+  bot.startTyping(message);
 
-  if (uptime > 60) {
-    uptime = uptime / 60;
-    unit = 'hour';
-  }
+  const keyId = process.env.CORP_KEY_ID || null;
+  const vCode = process.env.CORP_VCODE || null;
 
-  if (uptime !== 1) {
-    unit = unit + 's';
+  if (keyId === null || vCode === null) {
+    bot.reply(message, {
+      text: '',
+      attachments: [{
+        color: 'danger',
+        title: 'keyId or vCode not set by start'
+      }]
+    });
+  } else {
+    industry.history(keyId, vCode, XmlClient)
+      .then((reply) => {
+        bot.reply(message, reply);
+      });
   }
-
-  return uptime.toFixed(2) + ' ' + unit;
-}
+});
