@@ -6,6 +6,9 @@ if (!process.env.SLACK_API_TOKEN) {
 }
 
 const evejsapi = require('evejsapi');
+const moment = require('moment');
+
+moment.locale('de');
 
 const Helper = require('./lib/helper');
 const EveCentral = require('./lib/central');
@@ -135,8 +138,16 @@ controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your na
       '>. I have been running for ' + uptime + '.');
   });
 
-controller.hears(['^!industry-history$'], 'direct_message', (bot, message) => {
+controller.hears(['^!industry-history'], 'direct_message', (bot, message) => {
   bot.startTyping(message);
+
+  const allowedPeriods = ['lastMonth', 'lastWeek', 'last2Weeks'];
+
+  let period = 'lastMonth';
+  const search = message.text.split(' ');
+  if (search.length > 1 && allowedPeriods.indexOf(search[1]) !== -1) {
+    period = search[1];
+  }
 
   if (keyId === null || vCode === null) {
     bot.reply(message, {
@@ -147,7 +158,7 @@ controller.hears(['^!industry-history$'], 'direct_message', (bot, message) => {
       }]
     });
   } else {
-    industry.history(keyId, vCode)
+    industry.history(keyId, vCode, period)
       .then((reply) => {
         bot.reply(message, reply);
       });
