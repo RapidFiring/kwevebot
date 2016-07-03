@@ -27,6 +27,9 @@ const controller = Botkit.slackbot({
 const IndustryClass = require('./lib/industry');
 const industry = new IndustryClass(XmlClient);
 
+const WalletClass = require('./lib/wallet');
+const wallet = new WalletClass(XmlClient);
+
 const keyId = process.env.CORP_KEY_ID || null;
 const vCode = process.env.CORP_VCODE || null;
 
@@ -180,6 +183,34 @@ controller.hears(['^!industry$'], 'direct_message', (bot, message) => {
     industry.now(keyId, vCode)
       .then((reply) => {
         bot.reply(message, reply);
+      })
+      .catch(err => {
+        bot.reply(message, {
+          text: '',
+          attachments: [{
+            color: 'danger',
+            text: err
+          }]
+        });
+      });
+  }
+});
+
+controller.hears(['^!wallet$'], 'direct_message', (bot, message) => {
+  bot.startTyping(message);
+
+  if (keyId === null || vCode === null) {
+    bot.reply(message, {
+      text: '',
+      attachments: [{
+        color: 'danger',
+        title: 'keyId or vCode not set by start'
+      }]
+    });
+  } else {
+    wallet.history(keyId, vCode)
+      .then((reply) => {
+        // bot.reply(message, reply);
       })
       .catch(err => {
         bot.reply(message, {
