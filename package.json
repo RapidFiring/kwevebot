@@ -19,6 +19,7 @@
   "dependencies": {
     "botkit": "^0.2.2",
     "botkit-storage-redis": "^1.0.1",
+    "command-line-args": "^3.0.0",
     "evejsapi": "^1.0.6",
     "lodash": "^4.13.1",
     "moment": "^2.13.0",
