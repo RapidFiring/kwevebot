@@ -33,6 +33,8 @@ const wallet = new WalletClass(XmlClient);
 const keyId = process.env.CORP_KEY_ID || null;
 const vCode = process.env.CORP_VCODE || null;
 
+const allowedPeriods = ['lastMonth', 'lastWeek', 'last2Weeks'];
+
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./database/sqlite-latest.sqlite');
 db.serialize(() => {
@@ -144,8 +146,6 @@ controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your na
 controller.hears(['^!industry-history'], 'direct_message', (bot, message) => {
   bot.startTyping(message);
 
-  const allowedPeriods = ['lastMonth', 'lastWeek', 'last2Weeks'];
-
   let period = 'lastMonth';
   const search = message.text.split(' ');
   if (search.length > 1 && allowedPeriods.indexOf(search[1]) !== -1) {
@@ -196,8 +196,14 @@ controller.hears(['^!industry$'], 'direct_message', (bot, message) => {
   }
 });
 
-controller.hears(['^!wallet$'], 'direct_message', (bot, message) => {
+controller.hears(['^!wallet'], 'direct_message', (bot, message) => {
   bot.startTyping(message);
+
+  let period = 'lastMonth';
+  const search = message.text.split(' ');
+  if (search.length > 1 && allowedPeriods.indexOf(search[1]) !== -1) {
+    period = search[1];
+  }
 
   if (keyId === null || vCode === null) {
     bot.reply(message, {
@@ -208,9 +214,9 @@ controller.hears(['^!wallet$'], 'direct_message', (bot, message) => {
       }]
     });
   } else {
-    wallet.history(keyId, vCode)
+    wallet.history(period)
       .then((reply) => {
-        // bot.reply(message, reply);
+        bot.reply(message, reply);
       })
       .catch(err => {
         bot.reply(message, {

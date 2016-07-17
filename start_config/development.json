@@ -3,7 +3,7 @@
     "name": "kwevebot",
     "script": "./index.js",
     "watch": true,
-    "ignore_watch" : ["node_modules", "logdir", ".gitignore", ".git", ".idea"],
+    "ignore_watch" : ["node_modules", "logdir", ".gitignore", ".git", ".idea", "logs"],
     "merge_logs": true,
     "out_file": "./logdir/output.log",
     "error_file": "./logdir/error.log",
