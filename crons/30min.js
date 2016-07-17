@@ -84,6 +84,10 @@ try {
               lastRefId = value.refID;
             });
 
+            if (entryCount < options.rowCount) {
+              return resolve(true);
+            }
+
             options.fromID = lastRefId;
             setTimeout(resolve(self._fetchWalletJournal(options)), 1000);
           })
