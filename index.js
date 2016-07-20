@@ -27,8 +27,13 @@ const controller = Botkit.slackbot({
 const IndustryClass = require('./lib/industry');
 const industry = new IndustryClass(XmlClient);
 
+const WalletClass = require('./lib/wallet');
+const wallet = new WalletClass(XmlClient);
+
 const keyId = process.env.CORP_KEY_ID || null;
 const vCode = process.env.CORP_VCODE || null;
+
+const allowedPeriods = ['lastMonth', 'lastWeek', 'last2Weeks'];
 
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./database/sqlite-latest.sqlite');
@@ -141,8 +146,6 @@ controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your na
 controller.hears(['^!industry-history'], 'direct_message', (bot, message) => {
   bot.startTyping(message);
 
-  const allowedPeriods = ['lastMonth', 'lastWeek', 'last2Weeks'];
-
   let period = 'lastMonth';
   const search = message.text.split(' ');
   if (search.length > 1 && allowedPeriods.indexOf(search[1]) !== -1) {
@@ -178,6 +181,40 @@ controller.hears(['^!industry$'], 'direct_message', (bot, message) => {
     });
   } else {
     industry.now(keyId, vCode)
+      .then((reply) => {
+        bot.reply(message, reply);
+      })
+      .catch(err => {
+        bot.reply(message, {
+          text: '',
+          attachments: [{
+            color: 'danger',
+            text: err
+          }]
+        });
+      });
+  }
+});
+
+controller.hears(['^!wallet'], 'direct_message', (bot, message) => {
+  bot.startTyping(message);
+
+  let period = 'lastMonth';
+  const search = message.text.split(' ');
+  if (search.length > 1 && allowedPeriods.indexOf(search[1]) !== -1) {
+    period = search[1];
+  }
+
+  if (keyId === null || vCode === null) {
+    bot.reply(message, {
+      text: '',
+      attachments: [{
+        color: 'danger',
+        title: 'keyId or vCode not set by start'
+      }]
+    });
+  } else {
+    wallet.history(period)
       .then((reply) => {
         bot.reply(message, reply);
       })
