@@ -3,6 +3,7 @@ try {
 
   const _ = require('lodash');
   const mongoose = require('mongoose');
+  const moment = require('moment');
 
   const logger = require('../logger');
   const CronAbstract = require('./abstract');
@@ -37,6 +38,8 @@ try {
 
             jobs.reduce((previousValue, currentValue) => {
               return previousValue.then((memo) => {
+                currentValue.startDateInt = moment(currentValue.startDate).format('X');
+                currentValue.endDateInt = moment(currentValue.endDate).format('X');
                 return this._findOrSave(currentValue).then(() => {
                   return ++memo;
                 });
@@ -69,13 +72,7 @@ try {
               resolve(true);
             });
           } else {
-            JobHistory.update({jobID: data.jobID}, { $set: data }, (err) => {
-              if (err) {
-                logger.error('error while update industryHistorie', err);
-              }
-
-              resolve(true);
-            });
+            resolve(true);
           }
         });
       });
