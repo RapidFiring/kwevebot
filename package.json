@@ -19,11 +19,11 @@
   "dependencies": {
     "botkit": "^0.2.2",
     "botkit-storage-redis": "^1.0.1",
-    "command-line-args": "^3.0.0",
+    "command-line-args": "^3.0.1",
     "evejsapi": "^1.0.6",
-    "lodash": "^4.13.1",
-    "moment": "^2.13.0",
-    "mongoose": "^4.5.3",
+    "lodash": "^4.15.0",
+    "moment": "^2.14.1",
+    "mongoose": "^4.5.9",
     "redis": "^2.6.2",
     "sqlite3": "^3.1.4",
     "winston": "^2.2.0"
