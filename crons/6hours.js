@@ -52,7 +52,6 @@ try {
           })
           .catch(err => {
             logger.error('(catch) corp:IndustryJobsHistory', err);
-            console.error('(catch) corp:IndustryJobsHistory', err);
             resolve(true);
           });
       });
@@ -62,18 +61,16 @@ try {
 
       return new Promise((resolve) => {
 
-        JobHistory.findOne({jobID: data.jobID}, 'jobId', (err, job) => {
-          if (job === null) {
-            JobHistory.create(data, (err) => {
-              if (err) {
-                logger.error('error while create industryHistorie', err);
-              }
+        let query = {
+          jobID: data.jobID
+        };
 
-              resolve(true);
-            });
-          } else {
-            resolve(true);
+        JobHistory.findOneAndUpdate(query, data, {upsert: true}, (err) => {
+          if (err) {
+            logger.error('findOneAndUpdate', err);
           }
+
+          resolve(true);
         });
       });
     }
