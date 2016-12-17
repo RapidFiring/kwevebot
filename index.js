@@ -37,18 +37,28 @@ const allowedPeriods = ['lastMonth', 'lastWeek', 'last2Weeks'];
 
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./database/sqlite-latest.sqlite');
-db.serialize(() => {
-  controller.spawn({
-    token: process.env.SLACK_API_TOKEN || ''
-  }).startRTM();
+
+const bot = controller.spawn({
+  token: process.env.SLACK_API_TOKEN || ''
 });
 
-controller.on('hello', (bot) => {
-  console.info('Bot started and ping every 30sec');
-  setInterval(() => {
-    bot.rtm.ping();
-  }, 30000);
+const startRTM = () => {
+  bot.startRTM((err) => {
+    if (err) {
+      console.log('Failed to start RTM');
+      return setTimeout(startRTM, 60000);
+    }
 
+    console.log("RTM started!");
+  });
+};
+
+db.serialize(() => {
+  startRTM();
+});
+
+controller.on('rtm_close', () => {
+  startRTM();
 });
 
 controller.hears(['^!serverstatus$', '^!server$', '^!ServerStatus$'], 'ambient,direct_message', (bot, message) => {
