@@ -17,15 +17,16 @@
   },
   "homepage": "https://github.com/RapidFiring/kwevebot#readme",
   "dependencies": {
-    "botkit": "^0.2.2",
-    "botkit-storage-redis": "^1.0.1",
-    "command-line-args": "^3.0.1",
+    "botkit": "^0.4.3",
+    "botkit-storage-redis": "^1.1.0",
+    "command-line-args": "^3.0.4",
     "evejsapi": "^1.0.6",
-    "lodash": "^4.15.0",
-    "moment": "^2.14.1",
-    "mongoose": "^4.5.9",
-    "redis": "^2.6.2",
-    "sqlite3": "^3.1.4",
-    "winston": "^2.2.0"
+    "hiredis": "^0.5.0",
+    "lodash": "^4.17.2",
+    "moment": "^2.17.1",
+    "mongoose": "^4.7.3",
+    "redis": "^2.6.3",
+    "sqlite3": "^3.1.8",
+    "winston": "^2.3.0"
   }
 }
