@@ -1260,9 +1260,26 @@ mongodb@2.2.16:
     mongodb-core "2.1.2"
     readable-stream "2.1.5"
 
-mongoose@^4.4.19, mongoose@^4.7.3:
+mongoose@^4.4.19:
   version "4.7.3"
   resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-4.7.3.tgz#53db3403b30301158d9a37b4617d31a2541e95cd"
+  dependencies:
+    async "2.1.4"
+    bson "~0.5.4"
+    hooks-fixed "1.2.0"
+    kareem "1.1.5"
+    mongodb "2.2.16"
+    mpath "0.2.1"
+    mpromise "0.5.5"
+    mquery "2.0.0"
+    ms "0.7.2"
+    muri "1.1.1"
+    regexp-clone "0.0.1"
+    sliced "1.0.1"
+
+mongoose@^4.7.4:
+  version "4.7.4"
+  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-4.7.4.tgz#e92e16ec75ad62f3b56f7209612d65dd25b3f0bd"
   dependencies:
     async "2.1.4"
     bson "~0.5.4"
