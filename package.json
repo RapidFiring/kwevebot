@@ -1,6 +1,6 @@
 {
   "name": "kwevebot",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "evejsapi": "^1.0.6",
     "lodash": "^4.17.2",
     "moment": "^2.17.1",
-    "mongoose": "^4.7.3",
+    "mongoose": "^4.7.4",
     "redis": "^2.6.3",
     "sqlite3": "^3.1.8",
     "winston": "^2.3.0"

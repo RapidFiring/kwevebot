@@ -1,5 +1,3 @@
-'use strict';
-
 if (!process.env.SLACK_API_TOKEN) {
   console.log('Error: Specify token in environment');
   process.exit(1);
@@ -20,8 +18,9 @@ const XmlClient = new evejsapi.client.xml({
 
 const Botkit = require('botkit');
 const controller = Botkit.slackbot({
-  logLevel: process.env.LOG_LEVEL || info,
-  storage: require('botkit-storage-redis')()
+  logLevel: process.env.LOG_LEVEL || 'info',
+  storage: require('botkit-storage-redis')(),
+  debug: process.env.NODE_ENV === 'development'
 });
 
 const IndustryClass = require('./lib/industry');
@@ -29,6 +28,9 @@ const industry = new IndustryClass(XmlClient);
 
 const WalletClass = require('./lib/wallet');
 const wallet = new WalletClass(XmlClient);
+
+const Member = require('./lib/member');
+const member = new Member(XmlClient);
 
 const keyId = process.env.CORP_KEY_ID || null;
 const vCode = process.env.CORP_VCODE || null;
@@ -238,4 +240,8 @@ controller.hears(['^!wallet'], 'direct_message', (bot, message) => {
         });
       });
   }
+});
+
+controller.hears('^!member', 'direct_message', (bot, message) => {
+  member.fetch(bot, message, keyId, vCode);
 });
